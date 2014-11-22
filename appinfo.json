@@ -1,0 +1,17 @@
+{
+  "uuid": "ba53b035-745f-4c3f-b5cb-5ff3fe642cbc",
+  "shortName": "Gimbatul",
+  "longName": "Gimbatul",
+  "companyName": "MakeAwesomeHappen",
+  "versionCode": 1,
+  "versionLabel": "1.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
