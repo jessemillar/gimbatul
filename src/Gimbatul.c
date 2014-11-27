@@ -2,24 +2,37 @@
 
 Window *g_window;
 
-MenuLayer *g_menu_layer;
+int g_player_max_health = 100;
+int g_player_current_health = 100;
 
 BitmapLayer *g_image_layer;
 GBitmap *g_image;
 
-int g_image_count = 4;
-uint32_t g_images[4] = {
+int g_image_count = 8;
+uint32_t g_images[8] = {
 	RESOURCE_ID_CORRIDOR_CONTINUE,
 	RESOURCE_ID_CORRIDOR_DEAD,
 	RESOURCE_ID_CORRIDOR_LEFT,
-	RESOURCE_ID_CORRIDOR_RIGHT
+	RESOURCE_ID_CORRIDOR_RIGHT,
+	RESOURCE_ID_ENEMY_SKELLY,
+	RESOURCE_ID_ENEMY_SLUG,
+	RESOURCE_ID_ENEMY_SPIDER,
+	RESOURCE_ID_ENEMY_TROLL
 };
+
+void draw_health()
+{
+	graphics_context_set_stroke_color(g_image, GColorBlack);
+	graphics_draw_line(g_image, GPoint(0, 160), GPoint(144, 160));
+}
 
 void step(struct tm *tick_time, TimeUnits units_changed)
 {
+	// Clear the current image by destroying the layer and bitmap and readding to the window
 	bitmap_layer_destroy(g_image_layer);
 	gbitmap_destroy(g_image);
 
+	// Similar but not the same as in the window loader
 	g_image_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
 	g_image = gbitmap_create_with_resource(g_images[rand() % g_image_count]);
 
@@ -40,10 +53,7 @@ void window_load(Window *window)
 
 void window_unload(Window *window)
 {	
-	menu_layer_destroy(g_menu_layer);
-
 	bitmap_layer_destroy(g_image_layer);
-
 	gbitmap_destroy(g_image);
 }
 

@@ -8,7 +8,6 @@ Common symbol       size              file
 
 g_image_layer       0x4               src/Gimbatul.c.16.o
 g_window            0x4               src/Gimbatul.c.16.o
-g_menu_layer        0x4               src/Gimbatul.c.16.o
 g_image             0x4               src/Gimbatul.c.16.o
 
 Discarded input sections
@@ -27,6 +26,10 @@ Discarded input sections
                 0x0000000000000000        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
  .text          0x0000000000000000        0x0 src/Gimbatul.c.16.o
  .bss           0x0000000000000000        0x0 src/Gimbatul.c.16.o
+ .data.g_player_current_health
+                0x0000000000000000        0x4 src/Gimbatul.c.16.o
+ .data.g_player_max_health
+                0x0000000000000000        0x4 src/Gimbatul.c.16.o
  .text          0x0000000000000000        0x0 appinfo.auto.c.16.o
  .bss           0x0000000000000000        0x0 appinfo.auto.c.16.o
  .bss           0x0000000000000000        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
@@ -325,6 +328,8 @@ Discarded input sections
  .text.menu_index_compare
                 0x0000000000000000        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
  .text.menu_layer_create
+                0x0000000000000000        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+ .text.menu_layer_destroy
                 0x0000000000000000        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
  .text.menu_layer_get_layer
                 0x0000000000000000        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
@@ -707,141 +712,137 @@ LOAD /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-
  .pbl_header    0x0000000000000000       0x82 appinfo.auto.c.16.o
                 0x0000000000000000                __pbl_app_info
 
-.text           0x0000000000000084      0x2e0
+.text           0x0000000000000084      0x2c8
  *(.text)
  .text          0x0000000000000084       0x14 /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
  *(.text.*)
  .text.window_unload
-                0x0000000000000098       0x38 src/Gimbatul.c.16.o
+                0x0000000000000098       0x2c src/Gimbatul.c.16.o
                 0x0000000000000098                window_unload
  .text.window_load
-                0x00000000000000d0       0x64 src/Gimbatul.c.16.o
-                0x00000000000000d0                window_load
- .text.step     0x0000000000000134       0x94 src/Gimbatul.c.16.o
-                0x0000000000000134                step
- .text.init     0x00000000000001c8       0x78 src/Gimbatul.c.16.o
-                0x00000000000001c8                init
- .text.deinit   0x0000000000000240       0x18 src/Gimbatul.c.16.o
-                0x0000000000000240                deinit
+                0x00000000000000c4       0x64 src/Gimbatul.c.16.o
+                0x00000000000000c4                window_load
+ .text.step     0x0000000000000128       0x94 src/Gimbatul.c.16.o
+                0x0000000000000128                step
+ .text.init     0x00000000000001bc       0x78 src/Gimbatul.c.16.o
+                0x00000000000001bc                init
+ .text.deinit   0x0000000000000234       0x18 src/Gimbatul.c.16.o
+                0x0000000000000234                deinit
  .text.startup.main
-                0x0000000000000258       0x12 src/Gimbatul.c.16.o
-                0x0000000000000258                main
- *fill*         0x000000000000026a        0x2 
+                0x000000000000024c       0x12 src/Gimbatul.c.16.o
+                0x000000000000024c                main
+ *fill*         0x000000000000025e        0x2 
  .text.app_event_loop
-                0x000000000000026c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x000000000000026c                app_event_loop
+                0x0000000000000260        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000260                app_event_loop
  .text.bitmap_layer_create
-                0x0000000000000278        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000278                bitmap_layer_create
+                0x000000000000026c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x000000000000026c                bitmap_layer_create
  .text.bitmap_layer_destroy
-                0x0000000000000284        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000284                bitmap_layer_destroy
+                0x0000000000000278        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000278                bitmap_layer_destroy
  .text.bitmap_layer_get_layer
-                0x0000000000000290        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000290                bitmap_layer_get_layer
+                0x0000000000000284        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000284                bitmap_layer_get_layer
  .text.bitmap_layer_set_bitmap
-                0x000000000000029c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x000000000000029c                bitmap_layer_set_bitmap
+                0x0000000000000290        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000290                bitmap_layer_set_bitmap
  .text.gbitmap_create_with_resource
-                0x00000000000002a8        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002a8                gbitmap_create_with_resource
+                0x000000000000029c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x000000000000029c                gbitmap_create_with_resource
  .text.gbitmap_destroy
-                0x00000000000002b4        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002b4                gbitmap_destroy
+                0x00000000000002a8        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002a8                gbitmap_destroy
  .text.layer_add_child
-                0x00000000000002c0        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002c0                layer_add_child
- .text.memset   0x00000000000002cc        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002cc                memset
- .text.menu_layer_destroy
-                0x00000000000002d8        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002d8                menu_layer_destroy
- .text.rand     0x00000000000002e4        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002e4                rand
- .text.srand    0x00000000000002f0        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002f0                srand
+                0x00000000000002b4        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002b4                layer_add_child
+ .text.memset   0x00000000000002c0        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002c0                memset
+ .text.rand     0x00000000000002cc        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002cc                rand
+ .text.srand    0x00000000000002d8        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002d8                srand
  .text.tick_timer_service_subscribe
-                0x00000000000002fc        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x00000000000002fc                tick_timer_service_subscribe
- .text.time     0x0000000000000308        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000308                time
+                0x00000000000002e4        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002e4                tick_timer_service_subscribe
+ .text.time     0x00000000000002f0        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002f0                time
  .text.window_create
-                0x0000000000000314        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000314                window_create
+                0x00000000000002fc        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x00000000000002fc                window_create
  .text.window_destroy
-                0x0000000000000320        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000320                window_destroy
+                0x0000000000000308        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000308                window_destroy
  .text.window_get_root_layer
-                0x000000000000032c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x000000000000032c                window_get_root_layer
+                0x0000000000000314        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000314                window_get_root_layer
  .text.window_set_fullscreen
-                0x0000000000000338        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000338                window_set_fullscreen
+                0x0000000000000320        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000320                window_set_fullscreen
  .text.window_set_window_handlers
-                0x0000000000000344        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000344                window_set_window_handlers
+                0x000000000000032c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x000000000000032c                window_set_window_handlers
  .text.window_stack_push
-                0x0000000000000350        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
-                0x0000000000000350                window_stack_push
+                0x0000000000000338        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+                0x0000000000000338                window_stack_push
  *(.rodata)
- .rodata        0x000000000000035c        0x8 src/Gimbatul.c.16.o
+ .rodata        0x0000000000000344        0x8 src/Gimbatul.c.16.o
  *(.rodata*)
 
-.glue_7         0x0000000000000364        0x0
+.glue_7         0x000000000000034c        0x0
  .glue_7        0x0000000000000000        0x0 linker stubs
 
-.glue_7t        0x0000000000000364        0x0
+.glue_7t        0x000000000000034c        0x0
  .glue_7t       0x0000000000000000        0x0 linker stubs
 
-.vfp11_veneer   0x0000000000000364        0x0
+.vfp11_veneer   0x000000000000034c        0x0
  .vfp11_veneer  0x0000000000000000        0x0 linker stubs
 
-.v4_bx          0x0000000000000364        0x0
+.v4_bx          0x000000000000034c        0x0
  .v4_bx         0x0000000000000000        0x0 linker stubs
 
-.iplt           0x0000000000000364        0x0
+.iplt           0x000000000000034c        0x0
  .iplt          0x0000000000000000        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.rel.dyn        0x0000000000000364        0x0
+.rel.dyn        0x000000000000034c        0x0
  .rel.iplt      0x0000000000000000        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
  .rel.got       0x0000000000000000        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.data           0x0000000000000364       0x18
+.data           0x000000000000034c       0x28
  *(.data)
- .data          0x0000000000000364        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crti.o
- .data          0x0000000000000364        0x4 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
-                0x0000000000000364                __dso_handle
- .data          0x0000000000000368        0x0 src/Gimbatul.c.16.o
- .data          0x0000000000000368        0x0 appinfo.auto.c.16.o
- .data          0x0000000000000368        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
- .data          0x0000000000000368        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
- .data          0x0000000000000368        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtn.o
+ .data          0x000000000000034c        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crti.o
+ .data          0x000000000000034c        0x4 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
+                0x000000000000034c                __dso_handle
+ .data          0x0000000000000350        0x0 src/Gimbatul.c.16.o
+ .data          0x0000000000000350        0x0 appinfo.auto.c.16.o
+ .data          0x0000000000000350        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/lib/libpebble.a(tmpu_Elzfpebble.o)
+ .data          0x0000000000000350        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
+ .data          0x0000000000000350        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtn.o
  *(.data.*)
  .data.g_image_count
-                0x0000000000000368        0x4 src/Gimbatul.c.16.o
-                0x0000000000000368                g_image_count
+                0x0000000000000350        0x4 src/Gimbatul.c.16.o
+                0x0000000000000350                g_image_count
  .data.g_images
-                0x000000000000036c       0x10 src/Gimbatul.c.16.o
-                0x000000000000036c                g_images
+                0x0000000000000354       0x20 src/Gimbatul.c.16.o
+                0x0000000000000354                g_images
 
-.igot.plt       0x000000000000037c        0x0
+.igot.plt       0x0000000000000374        0x0
  .igot.plt      0x0000000000000000        0x0 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.got            0x000000000000037c       0x10
- .got           0x000000000000037c       0x10 /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
+.got            0x0000000000000374        0xc
+ .got           0x0000000000000374        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
 
-.got.plt        0x000000000000038c        0xc
- .got.plt       0x000000000000038c        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
-                0x000000000000038c                _GLOBAL_OFFSET_TABLE_
+.got.plt        0x0000000000000380        0xc
+ .got.plt       0x0000000000000380        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
+                0x0000000000000380                _GLOBAL_OFFSET_TABLE_
 
-.bss            0x0000000000000398       0x10
+.bss            0x000000000000038c        0xc
  *(.bss)
  *(.bss.*)
- COMMON         0x0000000000000398       0x10 src/Gimbatul.c.16.o
-                0x0000000000000398                g_image_layer
-                0x000000000000039c                g_window
-                0x00000000000003a0                g_menu_layer
-                0x00000000000003a4                g_image
+ COMMON         0x000000000000038c        0xc src/Gimbatul.c.16.o
+                0x000000000000038c                g_image_layer
+                0x0000000000000390                g_window
+                0x0000000000000394                g_image
 
 DISCARD
  libc.a(*)
@@ -874,9 +875,9 @@ OUTPUT(/Users/Jesse/Dropbox/Projects/Pebble/Gimbatul/build/pebble-app.elf elf32-
  .comment       0x0000000000000000       0x4f appinfo.auto.c.16.o
  .comment       0x0000000000000000       0x4f /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtend.o
 
-.debug_info     0x0000000000000000      0xc3f
- .debug_info    0x0000000000000000      0x907 src/Gimbatul.c.16.o
- .debug_info    0x0000000000000907      0x338 appinfo.auto.c.16.o
+.debug_info     0x0000000000000000      0xc1b
+ .debug_info    0x0000000000000000      0x8e3 src/Gimbatul.c.16.o
+ .debug_info    0x00000000000008e3      0x338 appinfo.auto.c.16.o
 
 .debug_abbrev   0x0000000000000000      0x340
  .debug_abbrev  0x0000000000000000      0x2a2 src/Gimbatul.c.16.o
@@ -894,14 +895,14 @@ OUTPUT(/Users/Jesse/Dropbox/Projects/Pebble/Gimbatul/build/pebble-app.elf elf32-
 .debug_ranges   0x0000000000000000       0x38
  .debug_ranges  0x0000000000000000       0x38 src/Gimbatul.c.16.o
 
-.debug_line     0x0000000000000000      0x394
- .debug_line    0x0000000000000000      0x278 src/Gimbatul.c.16.o
- .debug_line    0x0000000000000278      0x11c appinfo.auto.c.16.o
+.debug_line     0x0000000000000000      0x393
+ .debug_line    0x0000000000000000      0x277 src/Gimbatul.c.16.o
+ .debug_line    0x0000000000000277      0x11c appinfo.auto.c.16.o
 
-.debug_str      0x0000000000000000      0x667
- .debug_str     0x0000000000000000      0x509 src/Gimbatul.c.16.o
-                                        0x58b (size before relaxing)
- .debug_str     0x0000000000000509      0x15e appinfo.auto.c.16.o
+.debug_str      0x0000000000000000      0x669
+ .debug_str     0x0000000000000000      0x50b src/Gimbatul.c.16.o
+                                        0x58d (size before relaxing)
+ .debug_str     0x000000000000050b      0x15e appinfo.auto.c.16.o
                                         0x35e (size before relaxing)
 
 .debug_frame    0x0000000000000000       0xb0
