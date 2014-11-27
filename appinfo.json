@@ -2,7 +2,7 @@
   "uuid": "ba53b035-745f-4c3f-b5cb-5ff3fe642cbc",
   "shortName": "Gimbatul",
   "longName": "Gimbatul",
-  "companyName": "MakeAwesomeHappen",
+  "companyName": "Jesse Millar",
   "versionCode": 1,
   "versionLabel": "1.0",
   "watchapp": {
@@ -12,6 +12,47 @@
     "dummy": 0
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type":"png",
+        "name":"CORRIDOR_CONTINUE",
+        "file":"corridor/continue.png"
+      },
+      {
+        "type":"png",
+        "name":"CORRIDOR_DEAD",
+        "file":"corridor/dead.png"
+      },
+      {
+        "type":"png",
+        "name":"CORRIDOR_LEFT",
+        "file":"corridor/left.png"
+      },
+      {
+        "type":"png",
+        "name":"CORRIDOR_RIGHT",
+        "file":"corridor/right.png"
+      },
+      {
+        "type":"png",
+        "name":"ENEMY_SKELLY",
+        "file":"enemies/skelly.png"
+      },
+      {
+        "type":"png",
+        "name":"ENEMY_SLUG",
+        "file":"enemies/slug.png"
+      },
+      {
+        "type":"png",
+        "name":"ENEMY_SPIDER",
+        "file":"enemies/spider.png"
+      },
+      {
+        "type":"png",
+        "name":"ENEMY_TROLL",
+        "file":"enemies/troll.png"
+      }
+    ]
   }
 }
