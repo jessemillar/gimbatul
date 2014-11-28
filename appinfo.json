@@ -17,7 +17,12 @@
         "menuIcon": true,
         "type": "png",
         "name": "IMAGE_ICON",
-        "file": "icons/main.png"
+        "file": "icons/app.png"
+      },
+      {
+        "type": "font",
+        "name": "FONT_ALAGARD_15",
+        "file": "fonts/alagard.ttf"
       },
       {
         "type":"png",
