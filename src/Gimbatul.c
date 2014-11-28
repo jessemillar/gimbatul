@@ -2,16 +2,10 @@
 
 Window *g_window;
 
-int g_player_max_health = 144; // Screen width for ease of calculation
-int g_player_current_health = 144;
-int g_player_attack = 10;
-int g_player_defence = 10;
-
-int g_enemy_max_health = 144; // Also screen width for easier math
-int g_enemy_current_health = 144;
-int g_enemy_attack = 10;
-int g_enemy_defence = 10;
-int g_enemey_accuracy
+double g_player_max_health = 100;
+double g_player_current_health = 66;
+double g_player_attack = 10;
+double g_player_defence = 10;
 
 BitmapLayer *g_image_layer;
 GBitmap *g_image;
@@ -37,7 +31,7 @@ void draw_health(Layer *me, GContext *ctx)
 
 	graphics_context_set_stroke_color(ctx, GColorBlack);
 	// graphics_draw_line(ctx, GPoint(0, 0), GPoint(144, 0)); // Enemy health bar background
-	graphics_draw_line(ctx, GPoint(0, 167), GPoint((int16_t)(g_player_current_health), 167)); // Player health bar background
+	graphics_draw_line(ctx, GPoint(0, 167), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 167)); // Player health bar background
 }
 
 void step(struct tm *tick_time, TimeUnits units_changed)
