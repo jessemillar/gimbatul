@@ -9,8 +9,8 @@ BitmapLayer *g_image_layer;
 GBitmap *g_image;
 Layer *g_health_bars_layer;
 
-int g_image_count = 9; // I'm too lazy to figure out a better way to do this
-uint32_t g_images[9] = {
+int g_image_count = 10; // I'm too lazy to figure out a better way to do this
+uint32_t g_images[10] = {
 	RESOURCE_ID_CORRIDOR_CONTINUE,
 	RESOURCE_ID_CORRIDOR_DEAD,
 	RESOURCE_ID_CORRIDOR_LEFT,
@@ -19,28 +19,59 @@ uint32_t g_images[9] = {
 	RESOURCE_ID_ENEMY_SLUG,
 	RESOURCE_ID_ENEMY_SPIDER,
 	RESOURCE_ID_ENEMY_TROLL,
-	RESOURCE_ID_DISCOVERY_CHEST
+	RESOURCE_ID_OTHER_CHEST,
+	RESOURCE_ID_OTHER_PARCHMENT
 };
 
-void draw_health(Layer *me, GContext *ctx)
+void draw_health(Layer *me, GContext *ctx) // Currently draws two lines instead of one square for thickness (ghetto)
 {
 	graphics_context_set_stroke_color(ctx, GColorWhite);
+	graphics_draw_line(ctx, GPoint(0, 166), GPoint(144, 166)); // Player health bar background
 	graphics_draw_line(ctx, GPoint(0, 167), GPoint(144, 167)); // Player health bar background
 
 	graphics_context_set_stroke_color(ctx, GColorBlack);
+	graphics_draw_line(ctx, GPoint(0, 166), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 166)); // Player health bar
 	graphics_draw_line(ctx, GPoint(0, 167), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 167)); // Player health bar
+}
+
+void heal_player(int amount)
+{
+	if (g_player_current_health < g_player_max_health)
+	{
+		g_player_current_health += amount;
+
+		if (g_player_current_health > g_player_max_health)
+		{
+			g_player_current_health = g_player_max_health;
+		}
+
+		layer_mark_dirty(g_health_bars_layer); // Mark dirty to force a redraw of the whole screen (even though it looks like we're just redrawing the health bars)
+	}
+}
+
+void hurt_player(int amount)
+{
+	if (g_player_current_health > 0)
+	{
+		g_player_current_health += amount;
+
+		if (g_player_current_health < 0)
+		{
+			g_player_current_health = 0;
+		}
+
+		layer_mark_dirty(g_health_bars_layer); // Mark dirty to force a redraw of the whole screen (even though it looks like we're just redrawing the health bars)
+	}
 }
 
 void take_step(struct tm *tick_time, TimeUnits units_changed)
 {	
 	gbitmap_destroy(g_image); // Destroy the image before loading a different one to save RAM
 
-	// Similar but not quite the same as in the window loader
-	// g_image_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
 	g_image = gbitmap_create_with_resource(g_images[rand() % g_image_count]); // Select a random image from the array
 	bitmap_layer_set_bitmap(g_image_layer, g_image);
 
-	layer_mark_dirty(g_health_bars_layer); // Mark dirty to force a redraw of the health bars
+	layer_mark_dirty(g_health_bars_layer); // Mark dirty to force a redraw of the whole screen (even though it looks like we're just redrawing the health bars)
 }
 
 void window_load(Window *window)

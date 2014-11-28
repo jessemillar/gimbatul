@@ -61,8 +61,13 @@
       },
       {
         "type":"png",
-        "name":"DISCOVERY_CHEST",
+        "name":"OTHER_CHEST",
         "file":"other/chest.png"
+      },
+      {
+        "type":"png",
+        "name":"OTHER_PARCHMENT",
+        "file":"other/parchment.png"
       }
     ]
   }
