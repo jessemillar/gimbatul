@@ -3,16 +3,14 @@
 Window *g_window;
 
 double g_player_max_health = 100;
-double g_player_current_health = 66;
-double g_player_attack = 10;
-double g_player_defence = 10;
+double g_player_current_health = 75;
 
 BitmapLayer *g_image_layer;
 GBitmap *g_image;
 Layer *g_health_bars_layer;
 
-int g_image_count = 8;
-uint32_t g_images[8] = {
+int g_image_count = 9; // I'm too lazy to figure out a better way to do this
+uint32_t g_images[9] = {
 	RESOURCE_ID_CORRIDOR_CONTINUE,
 	RESOURCE_ID_CORRIDOR_DEAD,
 	RESOURCE_ID_CORRIDOR_LEFT,
@@ -20,35 +18,29 @@ uint32_t g_images[8] = {
 	RESOURCE_ID_ENEMY_SKELLY,
 	RESOURCE_ID_ENEMY_SLUG,
 	RESOURCE_ID_ENEMY_SPIDER,
-	RESOURCE_ID_ENEMY_TROLL
+	RESOURCE_ID_ENEMY_TROLL,
+	RESOURCE_ID_DISCOVERY_CHEST
 };
 
 void draw_health(Layer *me, GContext *ctx)
 {
 	graphics_context_set_stroke_color(ctx, GColorWhite);
-	// graphics_draw_line(ctx, GPoint(0, 0), GPoint(144, 0)); // Enemy health bar background
 	graphics_draw_line(ctx, GPoint(0, 167), GPoint(144, 167)); // Player health bar background
 
 	graphics_context_set_stroke_color(ctx, GColorBlack);
-	// graphics_draw_line(ctx, GPoint(0, 0), GPoint(144, 0)); // Enemy health bar background
-	graphics_draw_line(ctx, GPoint(0, 167), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 167)); // Player health bar background
+	graphics_draw_line(ctx, GPoint(0, 167), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 167)); // Player health bar
 }
 
-void step(struct tm *tick_time, TimeUnits units_changed)
-{
-	// Clear the current image by destroying the layer and bitmap and readding to the window
-	// bitmap_layer_destroy(g_image_layer);
-	gbitmap_destroy(g_image);
+void take_step(struct tm *tick_time, TimeUnits units_changed)
+{	
+	gbitmap_destroy(g_image); // Destroy the image before loading a different one to save RAM
 
-	// Similar but not the same as in the window loader
-	g_image_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
-	g_image = gbitmap_create_with_resource(g_images[rand() % g_image_count]);
-
+	// Similar but not quite the same as in the window loader
+	// g_image_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
+	g_image = gbitmap_create_with_resource(g_images[rand() % g_image_count]); // Select a random image from the array
 	bitmap_layer_set_bitmap(g_image_layer, g_image);
 
-	// layer_add_child(window_get_root_layer(g_window), bitmap_layer_get_layer(g_image_layer));
-
-	layer_mark_dirty(g_health_bars_layer); // Mark dirty to force a redraw using the function we've defined for drawing
+	layer_mark_dirty(g_health_bars_layer); // Mark dirty to force a redraw of the health bars
 }
 
 void window_load(Window *window)
@@ -78,7 +70,7 @@ void init()
 		.unload = window_unload,
 	});
 
-	tick_timer_service_subscribe(SECOND_UNIT, (TickHandler)step);
+	tick_timer_service_subscribe(SECOND_UNIT, (TickHandler)take_step);
 
 	srand(time(NULL)); // Set the random seed to the current time
 
