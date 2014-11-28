@@ -17,7 +17,7 @@
         "menuIcon": true,
         "type": "png",
         "name": "IMAGE_ICON",
-        "file": "icon.png"
+        "file": "icons/main.png"
       },
       {
         "type":"png",
@@ -58,6 +58,11 @@
         "type":"png",
         "name":"ENEMY_TROLL",
         "file":"enemies/troll.png"
+      },
+      {
+        "type":"png",
+        "name":"DISCOVERY_CHEST",
+        "file":"other/chest.png"
       }
     ]
   }
