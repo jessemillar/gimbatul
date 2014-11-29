@@ -119,11 +119,11 @@ void window_load(Window *window)
 	layer_add_child(window_get_root_layer(g_window), g_health_bars_layer);
 
 	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_15));
-	g_clock_layer = text_layer_create(GRect(0, 142, 144, 30));
+	g_clock_layer = text_layer_create(GRect(4, 150, 72, 30));
 	text_layer_set_background_color(g_clock_layer, GColorClear);
 	text_layer_set_text_color(g_clock_layer, GColorBlack);
 	text_layer_set_font(g_clock_layer, g_font_alagard);
-	text_layer_set_text_alignment(g_clock_layer, GTextAlignmentCenter);
+	// text_layer_set_text_alignment(g_clock_layer, GTextAlignmentCenter);
 	layer_add_child(window_get_root_layer(g_window), text_layer_get_layer(g_clock_layer));
 
 	populate_clock();
