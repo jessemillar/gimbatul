@@ -1,9 +1,9 @@
 #include <pebble.h>
 
-Window *g_window;
+#include <functions.h>
+#include <player.h>
 
-double g_player_max_health = 100;
-double g_player_current_health = 75;
+Window *g_window;
 
 BitmapLayer *g_image_layer;
 GBitmap *g_image;
@@ -75,7 +75,7 @@ void take_step(struct tm *tick_time, TimeUnits units_changed)
 	text_layer_set_text(g_clock_layer, buffer); // Display the time in the text time layer
 
 	gbitmap_destroy(g_image); // Destroy the image before loading a different one to save RAM
-	g_image = gbitmap_create_with_resource(g_images[rand() % g_image_count]); // Select a random image from the array
+	g_image = gbitmap_create_with_resource(g_images[random(g_image_count)]); // Select a random image from the array
 	bitmap_layer_set_bitmap(g_image_layer, g_image);
 
 	layer_mark_dirty(bitmap_layer_get_layer(g_image_layer)); // Mark dirty to force a redraw of the image
@@ -151,12 +151,20 @@ void init()
 
 	srand(time(NULL)); // Set the random seed to the current time
 
+	// Load persistent values
+	g_player_max_health = persist_exists(NUM_PLAYER_MAX_HEALTH) ? persist_read_int(NUM_PLAYER_MAX_HEALTH) : NUM_PLAYER_MAX_HEALTH;
+	g_player_current_health = persist_exists(NUM_PLAYER_CURRENT_HEALTH) ? persist_read_int(NUM_PLAYER_CURRENT_HEALTH) : NUM_PLAYER_MAX_HEALTH;
+
 	window_set_fullscreen(g_window, true); // Make the app fullscreen
 	window_stack_push(g_window, true);
 }
 
 void deinit()
 {
+	// Save persistent values
+	persist_write_int(NUM_PLAYER_MAX_HEALTH, (int)g_player_max_health);
+	persist_write_int(NUM_PLAYER_CURRENT_HEALTH, (int)g_player_current_health);
+
 	window_destroy(g_window);
 }
 
