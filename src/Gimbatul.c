@@ -10,7 +10,7 @@ GBitmap *g_image;
 Layer *g_health_bars_layer;
 
 TextLayer *g_clock_layer;
-GFont g_font_sailor_stitch;
+GFont g_font_alagard;
 
 int g_image_count = 4; // I'm too lazy to figure out a better way to do this
 uint32_t g_images[4] = {
@@ -55,7 +55,7 @@ void hurt_player(int amount)
 {
 	if (g_player_current_health > 0)
 	{
-		g_player_current_health += amount;
+		g_player_current_health -= amount;
 
 		if (g_player_current_health < 0)
 		{
@@ -67,19 +67,50 @@ void hurt_player(int amount)
 }
 
 void take_step(struct tm *tick_time, TimeUnits units_changed)
-{	
-	gbitmap_destroy(g_image); // Destroy the image before loading a different one to save RAM
+{
+	// Populate the clock
+	static char buffer[] = "00:00"; // Allocate "long-lived" storage (required by TextLayer)
+	strftime(buffer, sizeof(buffer), "%H:%M", tick_time); // Write the time to the buffer in a safe manner
+	clock_copy_time_string(buffer, sizeof(buffer)); // Reformat the time to the user's preference
+	text_layer_set_text(g_clock_layer, buffer); // Display the time in the text time layer
 
+	gbitmap_destroy(g_image); // Destroy the image before loading a different one to save RAM
 	g_image = gbitmap_create_with_resource(g_images[rand() % g_image_count]); // Select a random image from the array
 	bitmap_layer_set_bitmap(g_image_layer, g_image);
 
 	layer_mark_dirty(bitmap_layer_get_layer(g_image_layer)); // Mark dirty to force a redraw of the image
 }
 
+void populate_clock() // Initially populate the clock so the face doesn't start blank
+{
+	time_t temp = time(NULL);
+	take_step(localtime(&temp), MINUTE_UNIT); // Manually call the tick handler when the window is loading
+}
+
+void button_up_handler(ClickRecognizerRef recognizer, void *context)
+{
+	// APP_LOG(APP_LOG_LEVEL_INFO, "Up clicked");
+
+	heal_player(1);
+}
+
+void button_down_handler(ClickRecognizerRef recognizer, void *context)
+{
+	// APP_LOG(APP_LOG_LEVEL_INFO, "Down clicked");
+
+	hurt_player(1);
+}
+
+void click_config_provider(Window *window)
+{	
+	window_single_click_subscribe(BUTTON_ID_UP, button_up_handler);
+	window_single_click_subscribe(BUTTON_ID_DOWN, button_down_handler);
+}
+
 void window_load(Window *window)
 {
 	g_image_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
-	g_image = gbitmap_create_with_resource(RESOURCE_ID_CORRIDOR_CONTINUE);
+	g_image = gbitmap_create_with_resource(RESOURCE_ID_CORRIDOR_CONTINUE); // Initially set the image so we have something to destroy in the step function
 	bitmap_layer_set_bitmap(g_image_layer, g_image);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer));
 
@@ -87,14 +118,15 @@ void window_load(Window *window)
 	layer_set_update_proc(g_health_bars_layer, draw_health); // Set the drawing context for health bars
 	layer_add_child(window_get_root_layer(g_window), g_health_bars_layer);
 
-	g_font_sailor_stitch = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_15));
+	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_15));
 	g_clock_layer = text_layer_create(GRect(0, 142, 144, 30));
 	text_layer_set_background_color(g_clock_layer, GColorClear);
 	text_layer_set_text_color(g_clock_layer, GColorBlack);
-	text_layer_set_font(g_clock_layer, g_font_sailor_stitch);
+	text_layer_set_font(g_clock_layer, g_font_alagard);
 	text_layer_set_text_alignment(g_clock_layer, GTextAlignmentCenter);
-	text_layer_set_text(g_clock_layer, "12:24");
 	layer_add_child(window_get_root_layer(g_window), text_layer_get_layer(g_clock_layer));
+
+	populate_clock();
 }
 
 void window_unload(Window *window)
@@ -103,7 +135,7 @@ void window_unload(Window *window)
 	gbitmap_destroy(g_image);
 	layer_destroy(g_health_bars_layer);
 	text_layer_destroy(g_clock_layer);
-	fonts_unload_custom_font(g_font_sailor_stitch);
+	fonts_unload_custom_font(g_font_alagard);
 }
 
 void init()
@@ -114,7 +146,8 @@ void init()
 		.unload = window_unload,
 	});
 
-	tick_timer_service_subscribe(SECOND_UNIT, (TickHandler)take_step);
+	window_set_click_config_provider(g_window, (ClickConfigProvider) click_config_provider);
+	tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)take_step);
 
 	srand(time(NULL)); // Set the random seed to the current time
 
