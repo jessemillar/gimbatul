@@ -152,8 +152,7 @@ void init()
 	srand(time(NULL)); // Set the random seed to the current time
 
 	// Load persistent values
-	g_player_max_health = persist_exists(NUM_PLAYER_MAX_HEALTH) ? persist_read_int(NUM_PLAYER_MAX_HEALTH) : NUM_PLAYER_MAX_HEALTH;
-	g_player_current_health = persist_exists(NUM_PLAYER_CURRENT_HEALTH) ? persist_read_int(NUM_PLAYER_CURRENT_HEALTH) : NUM_PLAYER_MAX_HEALTH;
+	g_player_current_health = persist_exists(NUM_PLAYER_CURRENT_HEALTH) ? persist_read_int(NUM_PLAYER_CURRENT_HEALTH) : 100;
 
 	window_set_fullscreen(g_window, true); // Make the app fullscreen
 	window_stack_push(g_window, true);
@@ -162,8 +161,7 @@ void init()
 void deinit()
 {
 	// Save persistent values
-	persist_write_int(NUM_PLAYER_MAX_HEALTH, (int)g_player_max_health);
-	persist_write_int(NUM_PLAYER_CURRENT_HEALTH, (int)g_player_current_health);
+	persist_write_int(NUM_PLAYER_CURRENT_HEALTH, g_player_current_health);
 
 	window_destroy(g_window);
 }
