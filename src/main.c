@@ -6,13 +6,16 @@
 
 Window *g_window_main;
 Window *g_window_menu;
+Window *g_window_clock;
 
 BitmapLayer *g_image_layer;
 GBitmap *g_image;
 Layer *g_health_bars_layer;
 
+BitmapLayer *g_clock_image_layer;
+GBitmap *g_clock_image;
 TextLayer *g_clock_layer;
-GFont g_font_alagard;
+GFont *g_font_alagard;
 
 int g_menu_size = 3;
 SimpleMenuLayer *g_menu;
@@ -74,23 +77,11 @@ void hurt_player(int amount)
 
 void take_step(struct tm *tick_time, TimeUnits units_changed)
 {
-	// Populate the clock
-	static char buffer[] = "00:00xxx"; // Allocate "long-lived" storage (required by TextLayer)
-	strftime(buffer, sizeof(buffer), "%H:%M", tick_time); // Write the time to the buffer in a safe manner
-	clock_copy_time_string(buffer, sizeof(buffer)); // Reformat the time to the user's preference
-	text_layer_set_text(g_clock_layer, buffer); // Display the time in the text time layer
-
 	gbitmap_destroy(g_image); // Destroy the image before loading a different one to save RAM
 	g_image = gbitmap_create_with_resource(g_images[random(g_image_count)]); // Select a random image from the array
 	bitmap_layer_set_bitmap(g_image_layer, g_image);
 
 	layer_mark_dirty(bitmap_layer_get_layer(g_image_layer)); // Mark dirty to force a redraw of the image
-}
-
-void populate_clock() // Initially populate the clock so the face doesn't start blank
-{
-	time_t temp = time(NULL);
-	take_step(localtime(&temp), MINUTE_UNIT); // Manually call the tick handler when the window is loading
 }
 
 void button_up_handler(ClickRecognizerRef recognizer, void *context)
@@ -122,17 +113,9 @@ void window_main_load(Window *window)
 
 	g_health_bars_layer = layer_create(GRect(0, 0, 144, 168));
 	layer_set_update_proc(g_health_bars_layer, draw_health); // Set the drawing context for health bars
-	layer_add_child(window_get_root_layer(g_window_main), g_health_bars_layer);
+	layer_add_child(window_get_root_layer(window), g_health_bars_layer);
 
-	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_15));
-	g_clock_layer = text_layer_create(GRect(4, 150, 72, 30));
-	text_layer_set_background_color(g_clock_layer, GColorClear);
-	text_layer_set_text_color(g_clock_layer, GColorBlack);
-	text_layer_set_font(g_clock_layer, g_font_alagard);
-	// text_layer_set_text_alignment(g_clock_layer, GTextAlignmentCenter);
-	layer_add_child(window_get_root_layer(g_window_main), text_layer_get_layer(g_clock_layer));
-
-	populate_clock();
+	// populate_clock();
 }
 
 void window_main_unload(Window *window)
@@ -140,8 +123,6 @@ void window_main_unload(Window *window)
 	bitmap_layer_destroy(g_image_layer);
 	gbitmap_destroy(g_image);
 	layer_destroy(g_health_bars_layer);
-	text_layer_destroy(g_clock_layer);
-	fonts_unload_custom_font(g_font_alagard);
 	simple_menu_layer_destroy(g_menu);
 }
 
@@ -180,6 +161,47 @@ void window_menu_unload(Window *window)
 	// Stuff
 }
 
+void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially populate the clock so the face doesn't start blank
+{
+	// Populate the clock
+	static char buffer[] = "00:00xxx"; // Allocate "long-lived" storage (required by TextLayer)
+	strftime(buffer, sizeof(buffer), "%H:%M", tick_time); // Write the time to the buffer in a safe manner
+	clock_copy_time_string(buffer, sizeof(buffer)); // Reformat the time to the user's preference
+	text_layer_set_text(g_clock_layer, buffer); // Display the time in the text time layer
+}
+
+void window_clock_load(Window *window)
+{
+	g_clock_image_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
+	g_clock_image = gbitmap_create_with_resource(RESOURCE_ID_OTHER_PARCHMENT); // Initially set the image so we have something to destroy in the step function
+	bitmap_layer_set_bitmap(g_clock_image_layer, g_clock_image);
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_clock_image_layer));
+
+	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_26));
+	g_clock_layer = text_layer_create(GRect(0, 65, 144, 36));
+	text_layer_set_background_color(g_clock_layer, GColorClear);
+	text_layer_set_text_color(g_clock_layer, GColorBlack);
+	text_layer_set_font(g_clock_layer, g_font_alagard);
+	text_layer_set_text_alignment(g_clock_layer, GTextAlignmentCenter);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_clock_layer));
+
+	time_t temp = time(NULL);
+	populate_clock(localtime(&temp), MINUTE_UNIT); // Manually call the function with a "fake" time
+}
+
+void window_clock_unload(Window *window)
+{	
+	text_layer_destroy(g_clock_layer);
+	fonts_unload_custom_font(g_font_alagard);
+	bitmap_layer_destroy(g_clock_image_layer);
+	gbitmap_destroy(g_clock_image);
+}
+
+static void tap_handler(AccelAxisType axis, int32_t direction)
+{
+	window_stack_push(g_window_clock, true);
+}
+
 void init()
 {
 	g_window_main = window_create();
@@ -194,8 +216,16 @@ void init()
 		.unload = window_menu_unload,
 	});
 
+	g_window_clock = window_create();
+	window_set_window_handlers(g_window_clock, (WindowHandlers) {
+		.load = window_clock_load,
+		.unload = window_clock_unload,
+	});
+
 	window_set_click_config_provider(g_window_main, (ClickConfigProvider) click_config_provider);
 	tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)take_step);
+
+	accel_tap_service_subscribe(tap_handler); // Subscribe to taps
 
 	srand(time(NULL)); // Set the random seed to the current time
 
@@ -204,6 +234,10 @@ void init()
 
 	window_set_fullscreen(g_window_main, true); // Make the app fullscreen
 	window_stack_push(g_window_main, true);
+
+	window_set_fullscreen(g_window_menu, true); // Make the menu fullscreen
+
+	window_set_fullscreen(g_window_clock, true); // Make the clock fullscreen
 }
 
 void deinit()
