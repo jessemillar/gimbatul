@@ -12,6 +12,7 @@ BitmapLayer *g_image_layer;
 GBitmap *g_image;
 Layer *g_health_bars_layer;
 
+int g_clock_life = 3000; // Lifetime in milliseconds
 BitmapLayer *g_clock_image_layer;
 GBitmap *g_clock_image;
 TextLayer *g_clock_layer;
@@ -114,8 +115,6 @@ void window_main_load(Window *window)
 	g_health_bars_layer = layer_create(GRect(0, 0, 144, 168));
 	layer_set_update_proc(g_health_bars_layer, draw_health); // Set the drawing context for health bars
 	layer_add_child(window_get_root_layer(window), g_health_bars_layer);
-
-	// populate_clock();
 }
 
 void window_main_unload(Window *window)
@@ -123,7 +122,6 @@ void window_main_unload(Window *window)
 	bitmap_layer_destroy(g_image_layer);
 	gbitmap_destroy(g_image);
 	layer_destroy(g_health_bars_layer);
-	simple_menu_layer_destroy(g_menu);
 }
 
 void window_menu_load(Window *window)
@@ -158,7 +156,7 @@ void window_menu_load(Window *window)
 
 void window_menu_unload(Window *window)
 {	
-	// Stuff
+	simple_menu_layer_destroy(g_menu);
 }
 
 void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially populate the clock so the face doesn't start blank
@@ -168,6 +166,14 @@ void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially 
 	strftime(buffer, sizeof(buffer), "%H:%M", tick_time); // Write the time to the buffer in a safe manner
 	clock_copy_time_string(buffer, sizeof(buffer)); // Reformat the time to the user's preference
 	text_layer_set_text(g_clock_layer, buffer); // Display the time in the text time layer
+}
+
+void hide_clock()
+{
+	if (window_stack_contains_window(g_window_clock))
+	{
+		window_stack_remove(g_window_clock, true);
+	}
 }
 
 void window_clock_load(Window *window)
@@ -187,6 +193,8 @@ void window_clock_load(Window *window)
 
 	time_t temp = time(NULL);
 	populate_clock(localtime(&temp), MINUTE_UNIT); // Manually call the function with a "fake" time
+
+	app_timer_register(g_clock_life, hide_clock, NULL); // Hide the clock after a certain amount of time
 }
 
 void window_clock_unload(Window *window)
