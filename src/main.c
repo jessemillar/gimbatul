@@ -11,12 +11,15 @@ Window *g_window_clock;
 BitmapLayer *g_image_layer;
 GBitmap *g_image;
 Layer *g_health_bars_layer;
+GFont *g_font_press_start;
+TextLayer *g_level_layer;
+TextLayer *g_exp_layer;
 
-int g_clock_life = 3000; // Lifetime in milliseconds
+int g_clock_life = 2500; // Lifetime in milliseconds
 BitmapLayer *g_clock_image_layer;
 GBitmap *g_clock_image;
-TextLayer *g_clock_layer;
 GFont *g_font_alagard;
+TextLayer *g_clock_layer;
 
 int g_menu_size = 3;
 SimpleMenuLayer *g_menu;
@@ -35,15 +38,10 @@ uint32_t g_images[4] = {
 	// RESOURCE_ID_OTHER_CHEST
 };
 
-void draw_health(Layer *me, GContext *ctx) // Currently draws two lines instead of one square for thickness (ghetto)
+void draw_health(Layer *me, GContext *ctx)
 {
-	graphics_context_set_stroke_color(ctx, GColorWhite);
-	graphics_draw_line(ctx, GPoint(0, 166), GPoint(144, 166)); // Player health bar background
-	graphics_draw_line(ctx, GPoint(0, 167), GPoint(144, 167)); // Player health bar background
-
-	graphics_context_set_stroke_color(ctx, GColorBlack);
-	graphics_draw_line(ctx, GPoint(0, 166), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 166)); // Player health bar
-	graphics_draw_line(ctx, GPoint(0, 167), GPoint((int16_t)(144 * (g_player_current_health / g_player_max_health)), 167)); // Player health bar
+	graphics_context_set_fill_color(ctx, GColorBlack);
+	graphics_fill_rect(ctx, GRect(22, 145, (int16_t)(99 * (g_player_current_health / g_player_max_health)), 4), 0, 0);
 }
 
 void heal_player(int amount)
@@ -87,16 +85,12 @@ void take_step(struct tm *tick_time, TimeUnits units_changed)
 
 void button_up_handler(ClickRecognizerRef recognizer, void *context)
 {
-	// APP_LOG(APP_LOG_LEVEL_INFO, "Up clicked");
-
-	heal_player(1);
+	heal_player(3);
 }
 
 void button_down_handler(ClickRecognizerRef recognizer, void *context)
 {
-	// APP_LOG(APP_LOG_LEVEL_INFO, "Down clicked");
-
-	hurt_player(1);
+	hurt_player(3);
 }
 
 void click_config_provider(Window *window)
@@ -115,6 +109,24 @@ void window_main_load(Window *window)
 	g_health_bars_layer = layer_create(GRect(0, 0, 144, 168));
 	layer_set_update_proc(g_health_bars_layer, draw_health); // Set the drawing context for health bars
 	layer_add_child(window_get_root_layer(window), g_health_bars_layer);
+
+	g_font_press_start = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PRESS_START_8));
+
+	g_level_layer = text_layer_create(GRect(20, 155, 45, 10));
+	text_layer_set_background_color(g_level_layer, GColorClear);
+	text_layer_set_text_color(g_level_layer, GColorBlack);
+	text_layer_set_font(g_level_layer, g_font_press_start);
+	text_layer_set_text_alignment(g_level_layer, GTextAlignmentLeft);
+	text_layer_set_text(g_level_layer, "L7");
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_level_layer));
+
+	g_exp_layer = text_layer_create(GRect(33, 155, 90, 10));
+	text_layer_set_background_color(g_exp_layer, GColorClear);
+	text_layer_set_text_color(g_exp_layer, GColorBlack);
+	text_layer_set_font(g_exp_layer, g_font_press_start);
+	text_layer_set_text_alignment(g_exp_layer, GTextAlignmentRight);
+	text_layer_set_text(g_exp_layer, "EXP 5/52");
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_exp_layer));
 }
 
 void window_main_unload(Window *window)
@@ -184,7 +196,7 @@ void window_clock_load(Window *window)
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_clock_image_layer));
 
 	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_26));
-	g_clock_layer = text_layer_create(GRect(0, 65, 144, 36));
+	g_clock_layer = text_layer_create(GRect(0, 67, 144, 36));
 	text_layer_set_background_color(g_clock_layer, GColorClear);
 	text_layer_set_text_color(g_clock_layer, GColorBlack);
 	text_layer_set_font(g_clock_layer, g_font_alagard);
@@ -207,6 +219,7 @@ void window_clock_unload(Window *window)
 
 static void tap_handler(AccelAxisType axis, int32_t direction)
 {
+	// Do I need to check for and prevent data gathered from vibrations...?
 	window_stack_push(g_window_clock, true);
 }
 

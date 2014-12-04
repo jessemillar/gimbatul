@@ -21,6 +21,11 @@
       },
       {
         "type": "font",
+        "name": "FONT_PRESS_START_8",
+        "file": "fonts/press_start.ttf"
+      },
+      {
+        "type": "font",
         "name": "FONT_ALAGARD_26",
         "file": "fonts/alagard.ttf"
       },
