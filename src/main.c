@@ -21,8 +21,10 @@ SimpleMenuItem *g_layer_menu_items;
 int g_clock_life = 2500; // Lifetime in milliseconds
 BitmapLayer *g_image_layer_clock;
 GBitmap *g_image_clock_background;
-GFont *g_font_alagard;
+GFont *g_font_alagard_16;
+GFont *g_font_alagard_32;
 TextLayer *g_text_layer_time;
+TextLayer *g_text_layer_date;
 BitmapLayer *g_image_layer_clock_bluetooth;
 GBitmap *g_image_clock_bluetooth;
 BitmapLayer *g_image_layer_clock_battery;
@@ -193,6 +195,11 @@ void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially 
 	strftime(time_buffer, sizeof(time_buffer), "%H:%M", tick_time);
 	clock_copy_time_string(time_buffer, sizeof(time_buffer)); // Reformat the time to the user's preference
 	text_layer_set_text(g_text_layer_time, time_buffer);
+
+	// We need space for at least "Wed, Dec 25" and a trailing space
+	static char date_buffer[12];
+	strftime(date_buffer, sizeof(date_buffer), "%a, %b %e", tick_time);
+	text_layer_set_text(g_text_layer_date, date_buffer);
 }
 
 void hide_clock()
@@ -255,13 +262,21 @@ void window_clock_load(Window *window)
 	bitmap_layer_set_bitmap(g_image_layer_clock_battery, g_image_clock_battery);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_clock_battery));
 
-	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_32));
-	g_text_layer_time = text_layer_create(GRect(0, 67, 144, 36));
+	g_font_alagard_32 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_32));
+	g_text_layer_time = text_layer_create(GRect(0, 56, 144, 36));
 	text_layer_set_background_color(g_text_layer_time, GColorClear);
 	text_layer_set_text_color(g_text_layer_time, GColorBlack);
-	text_layer_set_font(g_text_layer_time, g_font_alagard);
+	text_layer_set_font(g_text_layer_time, g_font_alagard_32);
 	text_layer_set_text_alignment(g_text_layer_time, GTextAlignmentCenter);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_time));
+
+	g_font_alagard_16 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_16));
+	g_text_layer_date = text_layer_create(GRect(0, 89, 144, 20));
+	text_layer_set_background_color(g_text_layer_date, GColorClear);
+	text_layer_set_text_color(g_text_layer_date, GColorBlack);
+	text_layer_set_font(g_text_layer_date, g_font_alagard_16);
+	text_layer_set_text_alignment(g_text_layer_date, GTextAlignmentCenter);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_date));
 
 	time_t time_temp = time(NULL);
 	populate_clock(localtime(&time_temp), MINUTE_UNIT); // Manually call the function with a "fake" time
@@ -272,7 +287,9 @@ void window_clock_load(Window *window)
 void window_clock_unload(Window *window)
 {	
 	text_layer_destroy(g_text_layer_time);
-	fonts_unload_custom_font(g_font_alagard);
+	text_layer_destroy(g_text_layer_date);
+	fonts_unload_custom_font(g_font_alagard_32);
+	fonts_unload_custom_font(g_font_alagard_16);
 	bitmap_layer_destroy(g_image_layer_clock);
 	gbitmap_destroy(g_image_clock_background);
 	bitmap_layer_destroy(g_image_layer_clock_bluetooth);

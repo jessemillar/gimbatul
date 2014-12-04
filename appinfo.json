@@ -26,6 +26,11 @@
       },
       {
         "type": "font",
+        "name": "FONT_ALAGARD_16",
+        "file": "fonts/alagard.ttf"
+      },
+      {
+        "type": "font",
         "name": "FONT_ALAGARD_32",
         "file": "fonts/alagard.ttf"
       },

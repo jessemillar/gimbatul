@@ -1,13 +1,13 @@
-# project  configured on Wed Dec  3 22:01:30 2014 by
+# project  configured on Thu Dec  4 10:39:51 2014 by
 # waf 1.7.11 (abi 98, python 20706f0 on darwin)
-# using /Users/Jesse/pebble-dev/PebbleSDK-2.7/Pebble/waf configure build
+# using /Users/jessemillar/pebble-dev/PebbleSDK-2.7/Pebble/waf configure build
 #
 ----------------------------------------
 Setting top to
-/Users/Jesse/Dropbox/Projects/Pebble/Gimbatul
+/Users/jessemillar/Desktop/Gimbatul
 ----------------------------------------
 Setting out to
-/Users/Jesse/Dropbox/Projects/Pebble/Gimbatul/build
+/Users/jessemillar/Desktop/Gimbatul/build
 ----------------------------------------
 Checking for program gcc,cc
 arm-none-eabi-gcc
