@@ -110,20 +110,26 @@ void window_main_load(Window *window)
 
 	g_font_press_start = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PRESS_START_8));
 
+	// We need space for at least "L99" and the end character provided by snprintf
+	static char lvl_buffer[4]; // We need "static" so the buffer persists...?
+	snprintf(lvl_buffer, sizeof(lvl_buffer), "L%d", g_player_level);
 	g_text_layer_lvl = text_layer_create(GRect(20, 155, 45, 10));
 	text_layer_set_background_color(g_text_layer_lvl, GColorClear);
 	text_layer_set_text_color(g_text_layer_lvl, GColorBlack);
 	text_layer_set_font(g_text_layer_lvl, g_font_press_start);
 	text_layer_set_text_alignment(g_text_layer_lvl, GTextAlignmentLeft);
-	text_layer_set_text(g_text_layer_lvl, "L7");
+	text_layer_set_text(g_text_layer_lvl, lvl_buffer);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_lvl));
 
+	// We need space for at least "EXP 999/999" and the end character provided by snprintf
+	static char exp_buffer[12]; // We need "static" so the buffer persists...?
+	snprintf(exp_buffer, sizeof(exp_buffer), "EXP %d/%d", g_player_current_exp, g_player_max_exp);
 	g_text_layer_exp = text_layer_create(GRect(33, 155, 90, 10));
 	text_layer_set_background_color(g_text_layer_exp, GColorClear);
 	text_layer_set_text_color(g_text_layer_exp, GColorBlack);
 	text_layer_set_font(g_text_layer_exp, g_font_press_start);
 	text_layer_set_text_alignment(g_text_layer_exp, GTextAlignmentRight);
-	text_layer_set_text(g_text_layer_exp, "EXP 5/52");
+	text_layer_set_text(g_text_layer_exp, exp_buffer);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_exp));
 }
 
@@ -182,11 +188,11 @@ static void tap_handler(AccelAxisType axis, int32_t direction)
 
 void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially populate the clock so the face doesn't start blank
 {
-	// Populate the clock
-	static char buffer[] = "00:00xxx"; // Allocate "long-lived" storage (required by TextLayer)
-	strftime(buffer, sizeof(buffer), "%H:%M", tick_time); // Write the time to the buffer in a safe manner
-	clock_copy_time_string(buffer, sizeof(buffer)); // Reformat the time to the user's preference
-	text_layer_set_text(g_text_layer_time, buffer); // Display the time in the text time layer
+	// We need space for at least "00:00xxx"
+	static char time_buffer[8];
+	strftime(time_buffer, sizeof(time_buffer), "%H:%M", tick_time);
+	clock_copy_time_string(time_buffer, sizeof(time_buffer)); // Reformat the time to the user's preference
+	text_layer_set_text(g_text_layer_time, time_buffer);
 }
 
 void hide_clock()
@@ -216,7 +222,7 @@ void window_clock_load(Window *window)
 	bitmap_layer_set_bitmap(g_image_layer_clock_bluetooth, g_image_clock_bluetooth);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_clock_bluetooth));
 
-	g_image_layer_clock_battery = bitmap_layer_create(GRect(119, 11, 16, 9));
+	g_image_layer_clock_battery = bitmap_layer_create(GRect(118, 11, 16, 9));
 	BatteryChargeState battery_temp = battery_state_service_peek();
 	if (battery_temp.is_charging) // Change the image depending on the battery status
 	{
