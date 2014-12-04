@@ -1008,7 +1008,7 @@ LOAD /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-
  .got.plt       0x0000000000001650        0xc /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-eabi/4.7.2/thumb2/crtbegin.o
                 0x0000000000001650                _GLOBAL_OFFSET_TABLE_
 
-.bss            0x000000000000165c       0x64
+.bss            0x000000000000165c       0x68
  *(.bss)
  *(.bss.*)
  .bss.exp_buffer.6696
@@ -1016,27 +1016,28 @@ LOAD /Users/Jesse/pebble-dev/PebbleSDK-2.7/arm-cs-tools/bin/../lib/gcc/arm-none-
  .bss.lvl_buffer.6694
                 0x0000000000001668        0x4 src/main.c.29.o
  .bss.time_buffer.6719
-                0x000000000000166c        0x8 src/main.c.29.o
- COMMON         0x0000000000001674       0x4c src/main.c.29.o
-                0x0000000000001674                g_font_press_start
-                0x0000000000001678                g_font_alagard
-                0x000000000000167c                g_image_clock_battery
-                0x0000000000001680                g_layer_menu_items
-                0x0000000000001684                g_window_main
-                0x0000000000001688                g_window_menu
-                0x000000000000168c                g_window_clock
-                0x0000000000001690                g_layer_health_bars
-                0x0000000000001694                g_layer_menu
-                0x0000000000001698                g_image_clock_bluetooth
-                0x000000000000169c                g_image_layer_clock_battery
-                0x00000000000016a0                g_image_layer_main
-                0x00000000000016a4                g_image_layer_clock_bluetooth
-                0x00000000000016a8                g_text_layer_lvl
-                0x00000000000016ac                g_text_layer_time
-                0x00000000000016b0                g_image_layer_clock
-                0x00000000000016b4                g_text_layer_exp
-                0x00000000000016b8                g_image_main_background
-                0x00000000000016bc                g_image_clock_background
+                0x000000000000166c        0x9 src/main.c.29.o
+ *fill*         0x0000000000001675        0x3 
+ COMMON         0x0000000000001678       0x4c src/main.c.29.o
+                0x0000000000001678                g_font_press_start
+                0x000000000000167c                g_font_alagard
+                0x0000000000001680                g_image_clock_battery
+                0x0000000000001684                g_layer_menu_items
+                0x0000000000001688                g_window_main
+                0x000000000000168c                g_window_menu
+                0x0000000000001690                g_window_clock
+                0x0000000000001694                g_layer_health_bars
+                0x0000000000001698                g_layer_menu
+                0x000000000000169c                g_image_clock_bluetooth
+                0x00000000000016a0                g_image_layer_clock_battery
+                0x00000000000016a4                g_image_layer_main
+                0x00000000000016a8                g_image_layer_clock_bluetooth
+                0x00000000000016ac                g_text_layer_lvl
+                0x00000000000016b0                g_text_layer_time
+                0x00000000000016b4                g_image_layer_clock
+                0x00000000000016b8                g_text_layer_exp
+                0x00000000000016bc                g_image_main_background
+                0x00000000000016c0                g_image_clock_background
 
 DISCARD
  libc.a(*)

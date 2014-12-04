@@ -188,8 +188,8 @@ static void tap_handler(AccelAxisType axis, int32_t direction)
 
 void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially populate the clock so the face doesn't start blank
 {
-	// We need space for at least "00:00xxx"
-	static char time_buffer[8];
+	// We need space for at least "00:00xxx" and a trailing space
+	static char time_buffer[9];
 	strftime(time_buffer, sizeof(time_buffer), "%H:%M", tick_time);
 	clock_copy_time_string(time_buffer, sizeof(time_buffer)); // Reformat the time to the user's preference
 	text_layer_set_text(g_text_layer_time, time_buffer);
@@ -255,7 +255,7 @@ void window_clock_load(Window *window)
 	bitmap_layer_set_bitmap(g_image_layer_clock_battery, g_image_clock_battery);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_clock_battery));
 
-	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_26));
+	g_font_alagard = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ALAGARD_32));
 	g_text_layer_time = text_layer_create(GRect(0, 67, 144, 36));
 	text_layer_set_background_color(g_text_layer_time, GColorClear);
 	text_layer_set_text_color(g_text_layer_time, GColorBlack);
