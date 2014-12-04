@@ -30,6 +30,51 @@
         "file": "fonts/alagard.ttf"
       },
       {
+        "type": "png",
+        "name": "IMAGE_BLUETOOTH_ON",
+        "file": "other/bluetooth_on.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BLUETOOTH_OFF",
+        "file": "other/bluetooth_off.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_PLUGGED",
+        "file": "other/battery_plugged.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_CHARGING",
+        "file": "other/battery_charging.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_0",
+        "file": "other/battery_0.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_1",
+        "file": "other/battery_1.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_2",
+        "file": "other/battery_2.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_3",
+        "file": "other/battery_3.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BATTERY_4",
+        "file": "other/battery_4.png"
+      },
+      {
         "type":"png",
         "name":"CORRIDOR_CONTINUE",
         "file":"corridor/continue.png"
