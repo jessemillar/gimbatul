@@ -21,6 +21,8 @@ static int g_player_current_health;
 static int g_player_max_exp;
 static int g_player_current_exp;
 
+static bool in_fight = false;
+
 static Window *g_window_main;
 static Window *g_window_menu;
 static Window *g_window_clock;
