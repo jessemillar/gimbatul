@@ -21,7 +21,14 @@ static int g_player_current_health;
 static int g_player_max_exp;
 static int g_player_current_exp;
 
-static bool in_fight = false;
+// We actually set these further down in init()
+static int g_enemy_level = 1;
+static int g_enemy_max_health = 20;
+static int g_enemy_current_health = 20;
+
+static int g_fight_probability_cap = 10;
+static int g_fight_probability = 1; // ...out of g_fight_probability_cap is a fight
+static bool g_in_fight = false;
 
 static Window *g_window_main;
 static Window *g_window_menu;
@@ -57,6 +64,14 @@ static uint32_t g_images_corridor[4] = {
 	RESOURCE_ID_CORRIDOR_RIGHT
 };
 
+static int g_image_count_enemies = 4; // I'm too lazy to figure out a better way to do this
+static uint32_t g_images_enemies[4] = {
+	RESOURCE_ID_ENEMY_SKELLY,
+	RESOURCE_ID_ENEMY_SLUG,
+	RESOURCE_ID_ENEMY_SPIDER,
+	RESOURCE_ID_ENEMY_TROLL
+};
+
 static void log_int(int num)
 {
 	static char log_buffer[100]; // We need "static" so the buffer persists...?
@@ -74,11 +89,20 @@ static int random(int cap)
 
 static void draw_health(Layer *me, GContext *ctx)
 {
-	double temp_max = (double)g_player_max_health;
-	double temp_current = (double)g_player_current_health;
+	double temp_player_max = (double)g_player_max_health;
+	double temp_player_current = (double)g_player_current_health;
 
 	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_fill_rect(ctx, GRect(22, 145, (int16_t)(99 * (temp_current / temp_max)), 4), 0, 0);
+	graphics_fill_rect(ctx, GRect(22, 145, (int16_t)(99 * (temp_player_current / temp_player_max)), 4), 0, 0);
+
+	if (g_in_fight) // Draw the monster's health
+	{
+		double temp_enemy_max = (double)g_enemy_max_health;
+		double temp_enemy_current = (double)g_enemy_current_health;
+
+		graphics_context_set_fill_color(ctx, GColorBlack);
+		graphics_fill_rect(ctx, GRect(5, 5, (int16_t)(99 * (temp_enemy_current / temp_enemy_max)), 4), 0, 0);
+	}
 }
 
 static void heal_player(int amount)
@@ -117,11 +141,27 @@ static void hurt_player(int amount)
 
 static void take_step(struct tm *tick_time, TimeUnits units_changed)
 {
-	gbitmap_destroy(g_image_main_background); // Destroy the image before loading a different one to save RAM
-	g_image_main_background = gbitmap_create_with_resource(g_images_corridor[random(g_image_count_corridor)]); // Select a random image from the array
-	bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
+	if (!g_in_fight) // Don't take steps when in a fight
+	{
+		if (random(g_fight_probability_cap) == g_fight_probability) // Start a fight
+		{
+			g_in_fight = true; // End the fight only when the monster dies (or when the player does)
 
-	layer_mark_dirty(bitmap_layer_get_layer(g_image_layer_main)); // Mark dirty to force a redraw of the image
+			gbitmap_destroy(g_image_main_background); // Destroy the image before loading a different one to save RAM
+			g_image_main_background = gbitmap_create_with_resource(g_images_enemies[random(g_image_count_enemies)]); // Select a random image from the array
+			bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
+
+			layer_mark_dirty(bitmap_layer_get_layer(g_image_layer_main)); // Mark dirty to force a redraw of the image
+		}
+		else // Not a fight
+		{
+			gbitmap_destroy(g_image_main_background); // Destroy the image before loading a different one to save RAM
+			g_image_main_background = gbitmap_create_with_resource(g_images_corridor[random(g_image_count_corridor)]); // Select a random image from the array
+			bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
+
+			layer_mark_dirty(bitmap_layer_get_layer(g_image_layer_main)); // Mark dirty to force a redraw of the image
+		}
+	}
 }
 
 static void button_up_handler(ClickRecognizerRef recognizer, void *context)
