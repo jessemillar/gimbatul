@@ -102,11 +102,14 @@ static int random(int cap)
 
 static void draw_health(Layer *me, GContext *ctx)
 {
-	double temp_player_max = (double)g_player_max_health;
-	double temp_player_current = (double)g_player_current_health;
+	if (g_player_current_health > 0)
+	{
+		double temp_player_max = (double)g_player_max_health;
+		double temp_player_current = (double)g_player_current_health;
 
-	graphics_context_set_fill_color(ctx, GColorBlack);
-	graphics_fill_rect(ctx, GRect(22, 145, (int16_t)(99 * (temp_player_current / temp_player_max)), 4), 0, 0);
+		graphics_context_set_fill_color(ctx, GColorBlack);
+		graphics_fill_rect(ctx, GRect(22, 145, (int16_t)(99 * (temp_player_current / temp_player_max)), 4), 0, 0);
+	}
 
 	if (g_in_fight) // Draw the monster's health
 	{
@@ -144,7 +147,16 @@ static void hurt_player(int amount)
 			g_player_current_health = 0;
 		}
 
-		layer_mark_dirty(g_layer_health_bars); // Mark dirty to force a redraw the health bars
+		if (g_player_current_health == 0) // Kill the player
+		{
+			gbitmap_destroy(g_image_main_background); // Destroy the image before loading a different one to save RAM
+			g_image_main_background = gbitmap_create_with_resource(RESOURCE_ID_OTHER_DEATH);
+			bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
+		}
+		else
+		{
+			layer_mark_dirty(g_layer_health_bars); // Mark dirty to force a redraw the health bars
+		}
 	}
 }
 
@@ -163,10 +175,8 @@ static void hurt_enemy(int amount)
 	}
 }
 
-static void take_step(struct tm *tick_time, TimeUnits units_changed)
+static void step()
 {
-	heal_player(g_player_heal_rate); // Heal the player a bit each step even if we're in a fight
-
 	if (!g_in_fight) // Don't take steps when in a fight
 	{
 		if (random(g_fight_probability_cap) <= g_fight_probability) // Start a fight
@@ -196,6 +206,13 @@ static void take_step(struct tm *tick_time, TimeUnits units_changed)
 			layer_remove_from_parent(bitmap_layer_get_layer(g_image_layer_help_run));
 		}
 	}
+}
+
+static void take_step(struct tm *tick_time, TimeUnits units_changed) // I guess the SDK needs these variables
+{
+	heal_player(g_player_heal_rate); // Heal the player a bit each step even if we're in a fight
+	
+	step();
 }
 
 static void show_stats()
@@ -236,6 +253,8 @@ static void button_up_handler(ClickRecognizerRef recognizer, void *context)
 			}
 
 			show_stats();
+
+			step();
 		}
 	}
 }
@@ -249,6 +268,8 @@ static void button_down_handler(ClickRecognizerRef recognizer, void *context)
 			g_in_fight = false; // Run away from the fight
 
 			g_enemy_current_health = g_enemy_max_health; // Reset the enemy
+
+			step();
 		}
 		else
 		{
@@ -508,7 +529,7 @@ static void init()
 	});
 
 	window_set_click_config_provider(g_window_main, (ClickConfigProvider) click_config_provider);
-	tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)take_step);
+	tick_timer_service_subscribe(SECOND_UNIT, (TickHandler)take_step);
 
 	accel_tap_service_subscribe(tap_handler); // Subscribe to taps
 
