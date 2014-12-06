@@ -1,30 +1,37 @@
 #include <pebble.h>
 
 // These aren't values, they're "keys"
-#define NUM_CURRENT_LEVEL_PKEY 9999
-#define NUM_MAX_HEALTH_PKEY 9998
-#define NUM_CURRENT_HEALTH_PKEY 9997
-#define NUM_MAX_EXP_PKEY 9996
-#define NUM_CURRENT_EXP_PKEY 9995
+#define G_PLAYER_CURRENT_LEVEL_PKEY 9999
+#define G_PLAYER_MAX_HEALTH_PKEY 9998
+#define G_PLAYER_CURRENT_HEALTH_PKEY 9997
+#define G_PLAYER_MAX_EXP_PKEY 9996
+#define G_PLAYER_CURRENT_EXP_PKEY 9995
+#define G_PLAYER_HEAL_RATE_PKEY 9994
+#define G_PLAYER_ATTACK_PKEY 9993
 
 // These are the default values
-#define NUM_CURRENT_LEVEL_DEFAULT 1
-#define NUM_MAX_HEALTH_DEFAULT 100
-#define NUM_CURRENT_HEALTH_DEFAULT 100
-#define NUM_MAX_EXP_DEFAULT 5
-#define NUM_CURRENT_EXP_DEFAULT 0
+#define G_PLAYER_CURRENT_LEVEL_DEFAULT 1
+#define G_PLAYER_MAX_HEALTH_DEFAULT 100
+#define G_PLAYER_CURRENT_HEALTH_DEFAULT 100
+#define G_PLAYER_MAX_EXP_DEFAULT 5
+#define G_PLAYER_CURRENT_EXP_DEFAULT 0
+#define G_PLAYER_HEAL_RATE_DEFAULT 1
+#define G_PLAYER_ATTACK_DEFAULT 3
 
-// We actually set these further down in init()
+// We actually set these further down in init() (these are the ones we save to storage)
 static int g_player_level;
 static int g_player_max_health;
 static int g_player_current_health;
 static int g_player_max_exp;
 static int g_player_current_exp;
+static int g_player_heal_rate;
+static int g_player_attack;
 
-// We actually set these further down in init()
-static int g_enemy_level = 1;
+// I need to do something better with generating these values (and they'll need to be saves on app exit in case you leave halfway through a fight)
+static int g_enemy_level = 2;
 static int g_enemy_max_health = 20;
 static int g_enemy_current_health = 20;
+static int g_enemy_attack = 2;
 
 static int g_fight_probability_cap = 10;
 static int g_fight_probability = 1; // ...out of g_fight_probability_cap is a fight
@@ -40,6 +47,12 @@ static Layer *g_layer_health_bars;
 static GFont *g_font_press_start;
 static TextLayer *g_text_layer_lvl;
 static TextLayer *g_text_layer_exp;
+static BitmapLayer *g_image_layer_help_attack;
+static GBitmap *g_image_help_attack;
+static BitmapLayer *g_image_layer_help_menu;
+static GBitmap *g_image_help_menu;
+static BitmapLayer *g_image_layer_help_run;
+static GBitmap *g_image_help_run;
 
 static SimpleMenuLayer *g_layer_menu;
 static SimpleMenuItem *g_layer_menu_items;
@@ -101,7 +114,7 @@ static void draw_health(Layer *me, GContext *ctx)
 		double temp_enemy_current = (double)g_enemy_current_health;
 
 		graphics_context_set_fill_color(ctx, GColorBlack);
-		graphics_fill_rect(ctx, GRect(5, 5, (int16_t)(99 * (temp_enemy_current / temp_enemy_max)), 4), 0, 0);
+		graphics_fill_rect(ctx, GRect(6, 7, (int16_t)(132 * (temp_enemy_current / temp_enemy_max)), 4), 0, 0);
 	}
 }
 
@@ -118,8 +131,6 @@ static void heal_player(int amount)
 
 		layer_mark_dirty(g_layer_health_bars); // Mark dirty to force a redraw the health bars
 	}
-
-	// log_int(g_player_current_health);
 }
 
 static void hurt_player(int amount)
@@ -135,15 +146,30 @@ static void hurt_player(int amount)
 
 		layer_mark_dirty(g_layer_health_bars); // Mark dirty to force a redraw the health bars
 	}
+}
 
-	// log_int(g_player_current_health);
+static void hurt_enemy(int amount)
+{
+	if (g_enemy_current_health > 0)
+	{
+		g_enemy_current_health -= amount;
+
+		if (g_enemy_current_health < 0)
+		{
+			g_enemy_current_health = 0;
+		}
+
+		layer_mark_dirty(g_layer_health_bars); // Mark dirty to force a redraw the health bars
+	}
 }
 
 static void take_step(struct tm *tick_time, TimeUnits units_changed)
 {
+	heal_player(g_player_heal_rate); // Heal the player a bit each step even if we're in a fight
+
 	if (!g_in_fight) // Don't take steps when in a fight
 	{
-		if (random(g_fight_probability_cap) == g_fight_probability) // Start a fight
+		if (random(g_fight_probability_cap) <= g_fight_probability) // Start a fight
 		{
 			g_in_fight = true; // End the fight only when the monster dies (or when the player does)
 
@@ -152,6 +178,10 @@ static void take_step(struct tm *tick_time, TimeUnits units_changed)
 			bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
 
 			layer_mark_dirty(bitmap_layer_get_layer(g_image_layer_main)); // Mark dirty to force a redraw of the image
+
+			layer_add_child(window_get_root_layer(g_window_main), bitmap_layer_get_layer(g_image_layer_help_attack));
+			layer_add_child(window_get_root_layer(g_window_main), bitmap_layer_get_layer(g_image_layer_help_menu));
+			layer_add_child(window_get_root_layer(g_window_main), bitmap_layer_get_layer(g_image_layer_help_run));
 		}
 		else // Not a fight
 		{
@@ -160,18 +190,71 @@ static void take_step(struct tm *tick_time, TimeUnits units_changed)
 			bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
 
 			layer_mark_dirty(bitmap_layer_get_layer(g_image_layer_main)); // Mark dirty to force a redraw of the image
+
+			layer_remove_from_parent(bitmap_layer_get_layer(g_image_layer_help_attack));
+			layer_add_child(window_get_root_layer(g_window_main), bitmap_layer_get_layer(g_image_layer_help_menu));
+			layer_remove_from_parent(bitmap_layer_get_layer(g_image_layer_help_run));
 		}
 	}
 }
 
+static void show_stats()
+{
+	// We need space for at least "L99" and the end character provided by snprintf
+	static char lvl_buffer[4]; // We need "static" so the buffer persists...?
+	snprintf(lvl_buffer, sizeof(lvl_buffer), "L%d", g_player_level);
+	text_layer_set_text(g_text_layer_lvl, lvl_buffer);
+
+	// We need space for at least "EXP 999/999" and the end character provided by snprintf
+	static char exp_buffer[12]; // We need "static" so the buffer persists...?
+	snprintf(exp_buffer, sizeof(exp_buffer), "EXP %d/%d", g_player_current_exp, g_player_max_exp);
+	text_layer_set_text(g_text_layer_exp, exp_buffer);
+}
+
 static void button_up_handler(ClickRecognizerRef recognizer, void *context)
 {
-	heal_player(3);
+	if (g_in_fight)
+	{
+		hurt_enemy(g_player_attack);
+
+		if (g_enemy_current_health > 0)
+		{
+			hurt_player(g_enemy_attack);
+		}
+		else
+		{
+			g_in_fight = false; // End the fight
+
+			g_enemy_current_health = g_enemy_max_health; // Reset the enemy
+
+			g_player_current_exp += g_enemy_level;
+
+			if (g_player_current_exp >= g_player_max_exp)
+			{
+				g_player_current_exp = g_player_current_exp - g_player_max_exp;
+				g_player_level++;
+			}
+
+			show_stats();
+		}
+	}
 }
 
 static void button_down_handler(ClickRecognizerRef recognizer, void *context)
 {
-	hurt_player(3);
+	if (g_in_fight)
+	{
+		if (random(3) == 1)
+		{
+			g_in_fight = false; // Run away from the fight
+
+			g_enemy_current_health = g_enemy_max_health; // Reset the enemy
+		}
+		else
+		{
+			hurt_player(g_enemy_attack / 2);
+		}
+	}
 }
 
 static void click_config_provider(Window *window)
@@ -187,32 +270,40 @@ static void window_main_load(Window *window)
 	bitmap_layer_set_bitmap(g_image_layer_main, g_image_main_background);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_main));
 
+	g_image_layer_help_attack = bitmap_layer_create(GRect(132, 36, 12, 21));
+	g_image_help_attack = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HELP_ATTACK);
+	bitmap_layer_set_bitmap(g_image_layer_help_attack, g_image_help_attack);
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_help_attack));
+	g_image_layer_help_menu = bitmap_layer_create(GRect(132, 79, 12, 20));
+	g_image_help_menu = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HELP_MENU);
+	bitmap_layer_set_bitmap(g_image_layer_help_menu, g_image_help_menu);
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_help_menu));
+	g_image_layer_help_run = bitmap_layer_create(GRect(132, 121, 12, 21));
+	g_image_help_run = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HELP_RUN);
+	bitmap_layer_set_bitmap(g_image_layer_help_run, g_image_help_run);
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(g_image_layer_help_run));
+
 	g_layer_health_bars = layer_create(GRect(0, 0, 144, 168));
 	layer_set_update_proc(g_layer_health_bars, draw_health); // Set the drawing context for health bars
 	layer_add_child(window_get_root_layer(window), g_layer_health_bars);
 
 	g_font_press_start = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PRESS_START_8));
 
-	// We need space for at least "L99" and the end character provided by snprintf
-	static char lvl_buffer[4]; // We need "static" so the buffer persists...?
-	snprintf(lvl_buffer, sizeof(lvl_buffer), "L%d", g_player_level);
 	g_text_layer_lvl = text_layer_create(GRect(20, 155, 45, 10));
 	text_layer_set_background_color(g_text_layer_lvl, GColorClear);
 	text_layer_set_text_color(g_text_layer_lvl, GColorBlack);
 	text_layer_set_font(g_text_layer_lvl, g_font_press_start);
-	text_layer_set_text_alignment(g_text_layer_lvl, GTextAlignmentLeft);
-	text_layer_set_text(g_text_layer_lvl, lvl_buffer);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_lvl));
+	text_layer_set_text_alignment(g_text_layer_lvl, GTextAlignmentLeft);	
 
-	// We need space for at least "EXP 999/999" and the end character provided by snprintf
-	static char exp_buffer[12]; // We need "static" so the buffer persists...?
-	snprintf(exp_buffer, sizeof(exp_buffer), "EXP %d/%d", g_player_current_exp, g_player_max_exp);
 	g_text_layer_exp = text_layer_create(GRect(33, 155, 90, 10));
 	text_layer_set_background_color(g_text_layer_exp, GColorClear);
 	text_layer_set_text_color(g_text_layer_exp, GColorBlack);
 	text_layer_set_font(g_text_layer_exp, g_font_press_start);
 	text_layer_set_text_alignment(g_text_layer_exp, GTextAlignmentRight);
-	text_layer_set_text(g_text_layer_exp, exp_buffer);
+
+	show_stats();
+
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_lvl));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_exp));
 }
 
@@ -224,13 +315,19 @@ static void window_main_unload(Window *window)
 	fonts_unload_custom_font(g_font_press_start);
 	text_layer_destroy(g_text_layer_lvl);
 	text_layer_destroy(g_text_layer_exp);
+	bitmap_layer_destroy(g_image_layer_help_attack);
+	gbitmap_destroy(g_image_help_attack);
+	bitmap_layer_destroy(g_image_layer_help_menu);
+	gbitmap_destroy(g_image_help_menu);
+	bitmap_layer_destroy(g_image_layer_help_run);
+	gbitmap_destroy(g_image_help_run);
 }
 
 static void window_menu_load(Window *window)
 {
 	// menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_MENU_ICON_1);
 
-	// Although we already defined NUM_FIRST_MENU_ITEMS, you can define an int as such to easily change the order of menu items later
+	// Although we already defined G_PLAYER_FIRST_MENU_ITEMS, you can define an int as such to easily change the order of menu items later
 	int num_a_items = 0;
 
 	g_layer_menu_items[num_a_items++] = (SimpleMenuItem)
@@ -382,11 +479,13 @@ static void window_clock_unload(Window *window)
 static void init()
 {
 	// Load persistent values before doing anything else
-	g_player_level = persist_exists(NUM_CURRENT_LEVEL_PKEY) ? persist_read_int(NUM_CURRENT_LEVEL_PKEY) : NUM_CURRENT_LEVEL_DEFAULT;
-	g_player_max_health = persist_exists(NUM_MAX_HEALTH_PKEY) ? persist_read_int(NUM_MAX_HEALTH_PKEY) : NUM_MAX_HEALTH_DEFAULT;
-	g_player_current_health = persist_exists(NUM_CURRENT_HEALTH_PKEY) ? persist_read_int(NUM_CURRENT_HEALTH_PKEY) : NUM_CURRENT_HEALTH_DEFAULT;
-	g_player_max_exp = persist_exists(NUM_MAX_EXP_PKEY) ? persist_read_int(NUM_MAX_EXP_PKEY) : NUM_MAX_EXP_DEFAULT;
-	g_player_current_exp = persist_exists(NUM_CURRENT_EXP_PKEY) ? persist_read_int(NUM_CURRENT_EXP_PKEY) : NUM_CURRENT_EXP_DEFAULT;
+	g_player_level = persist_exists(G_PLAYER_CURRENT_LEVEL_PKEY) ? persist_read_int(G_PLAYER_CURRENT_LEVEL_PKEY) : G_PLAYER_CURRENT_LEVEL_DEFAULT;
+	g_player_max_health = persist_exists(G_PLAYER_MAX_HEALTH_PKEY) ? persist_read_int(G_PLAYER_MAX_HEALTH_PKEY) : G_PLAYER_MAX_HEALTH_DEFAULT;
+	g_player_current_health = persist_exists(G_PLAYER_CURRENT_HEALTH_PKEY) ? persist_read_int(G_PLAYER_CURRENT_HEALTH_PKEY) : G_PLAYER_CURRENT_HEALTH_DEFAULT;
+	g_player_max_exp = persist_exists(G_PLAYER_MAX_EXP_PKEY) ? persist_read_int(G_PLAYER_MAX_EXP_PKEY) : G_PLAYER_MAX_EXP_DEFAULT;
+	g_player_current_exp = persist_exists(G_PLAYER_CURRENT_EXP_PKEY) ? persist_read_int(G_PLAYER_CURRENT_EXP_PKEY) : G_PLAYER_CURRENT_EXP_DEFAULT;
+	g_player_heal_rate = persist_exists(G_PLAYER_HEAL_RATE_PKEY) ? persist_read_int(G_PLAYER_HEAL_RATE_PKEY) : G_PLAYER_HEAL_RATE_DEFAULT;
+	g_player_attack = persist_exists(G_PLAYER_ATTACK_PKEY) ? persist_read_int(G_PLAYER_ATTACK_PKEY) : G_PLAYER_ATTACK_DEFAULT;
 
 	// log_int(g_player_max_health);
 
@@ -409,7 +508,7 @@ static void init()
 	});
 
 	window_set_click_config_provider(g_window_main, (ClickConfigProvider) click_config_provider);
-	tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)take_step);
+	tick_timer_service_subscribe(SECOND_UNIT, (TickHandler)take_step);
 
 	accel_tap_service_subscribe(tap_handler); // Subscribe to taps
 
@@ -424,11 +523,13 @@ static void init()
 static void deinit()
 {
 	// Save persistent values
-	persist_write_int(NUM_CURRENT_LEVEL_PKEY, g_player_level);
-	persist_write_int(NUM_MAX_HEALTH_PKEY, g_player_max_health);
-	persist_write_int(NUM_CURRENT_HEALTH_PKEY, g_player_current_health);
-	persist_write_int(NUM_MAX_EXP_PKEY, g_player_max_exp);
-	persist_write_int(NUM_CURRENT_EXP_PKEY, g_player_current_exp);
+	persist_write_int(G_PLAYER_CURRENT_LEVEL_PKEY, g_player_level);
+	persist_write_int(G_PLAYER_MAX_HEALTH_PKEY, g_player_max_health);
+	persist_write_int(G_PLAYER_CURRENT_HEALTH_PKEY, g_player_current_health);
+	persist_write_int(G_PLAYER_MAX_EXP_PKEY, g_player_max_exp);
+	persist_write_int(G_PLAYER_CURRENT_EXP_PKEY, g_player_current_exp);
+	persist_write_int(G_PLAYER_HEAL_RATE_PKEY, g_player_current_exp);
+	persist_write_int(G_PLAYER_ATTACK_PKEY, g_player_attack);
 
 	window_destroy(g_window_main);
 	window_destroy(g_window_menu);

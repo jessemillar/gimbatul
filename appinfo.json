@@ -36,48 +36,63 @@
       },
       {
         "type": "png",
+        "name": "IMAGE_HELP_ATTACK",
+        "file": "other/help/attack.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_HELP_MENU",
+        "file": "other/help/menu.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_HELP_RUN",
+        "file": "other/help/run.png"
+      },
+      {
+        "type": "png",
         "name": "IMAGE_BLUETOOTH_ON",
-        "file": "other/bluetooth_on.png"
+        "file": "other/clock/bluetooth_on.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BLUETOOTH_OFF",
-        "file": "other/bluetooth_off.png"
+        "file": "other/clock/bluetooth_off.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_PLUGGED",
-        "file": "other/battery_plugged.png"
+        "file": "other/clock/battery_plugged.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_CHARGING",
-        "file": "other/battery_charging.png"
+        "file": "other/clock/battery_charging.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_0",
-        "file": "other/battery_0.png"
+        "file": "other/clock/battery_0.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_1",
-        "file": "other/battery_1.png"
+        "file": "other/clock/battery_1.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_2",
-        "file": "other/battery_2.png"
+        "file": "other/clock/battery_2.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_3",
-        "file": "other/battery_3.png"
+        "file": "other/clock/battery_3.png"
       },
       {
         "type": "png",
         "name": "IMAGE_BATTERY_4",
-        "file": "other/battery_4.png"
+        "file": "other/clock/battery_4.png"
       },
       {
         "type":"png",
