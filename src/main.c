@@ -508,7 +508,7 @@ static void init()
 	});
 
 	window_set_click_config_provider(g_window_main, (ClickConfigProvider) click_config_provider);
-	tick_timer_service_subscribe(SECOND_UNIT, (TickHandler)take_step);
+	tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)take_step);
 
 	accel_tap_service_subscribe(tap_handler); // Subscribe to taps
 
