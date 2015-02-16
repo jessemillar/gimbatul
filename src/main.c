@@ -2,6 +2,7 @@
 
 #include "globals.h"
 #include "combat.h"
+#include "tools.h"
 #include "main.h"
 
 // I need to do something better with generating these values (and they'll need to be saves on app exit in case you leave halfway through a fight)
@@ -32,14 +33,7 @@ uint32_t g_images_enemies[4] = {
 	RESOURCE_ID_ENEMY_TROLL
 };
 
-static int random(int cap)
-{
-	int temp = rand() % cap;
-
-	return temp;
-}
-
-static void draw_health(Layer *me, GContext *ctx)
+void draw_health(Layer *me, GContext *ctx)
 {
 	if (g_player_current_health > 0)
 	{
@@ -60,7 +54,7 @@ static void draw_health(Layer *me, GContext *ctx)
 	}
 }
 
-static void heal_player(int amount)
+void heal_player(int amount)
 {
 	if (g_player_current_health < g_player_max_health)
 	{
@@ -75,7 +69,7 @@ static void heal_player(int amount)
 	}
 }
 
-static void hurt_player(int amount)
+void hurt_player(int amount)
 {
 	if (g_player_current_health > 0)
 	{
@@ -99,7 +93,7 @@ static void hurt_player(int amount)
 	}
 }
 
-static void hurt_enemy(int amount)
+void hurt_enemy(int amount)
 {
 	if (g_enemy_current_health > 0)
 	{
@@ -114,7 +108,7 @@ static void hurt_enemy(int amount)
 	}
 }
 
-static void step()
+void step()
 {
 	if (!g_in_fight) // Don't take steps when in a fight
 	{
@@ -147,27 +141,27 @@ static void step()
 	}
 }
 
-static void take_step(struct tm *tick_time, TimeUnits units_changed) // I guess the SDK needs these variables
+void take_step(struct tm *tick_time, TimeUnits units_changed) // I guess the SDK needs these variables
 {
 	heal_player(g_player_heal_rate); // Heal the player a bit each step even if we're in a fight
 	
 	step();
 }
 
-static void show_stats()
+void show_stats()
 {
 	// We need space for at least "L99" and the end character provided by snprintf
-	static char lvl_buffer[4]; // We need "static" so the buffer persists...?
+	char lvl_buffer[4]; // We need "static" so the buffer persists...?
 	snprintf(lvl_buffer, sizeof(lvl_buffer), "L%d", g_player_level);
 	text_layer_set_text(g_text_layer_lvl, lvl_buffer);
 
 	// We need space for at least "EXP 999/999" and the end character provided by snprintf
-	static char exp_buffer[12]; // We need "static" so the buffer persists...?
+	char exp_buffer[12]; // We need "static" so the buffer persists...?
 	snprintf(exp_buffer, sizeof(exp_buffer), "EXP %d/%d", g_player_current_exp, g_player_max_exp);
 	text_layer_set_text(g_text_layer_exp, exp_buffer);
 }
 
-static void button_up_handler(ClickRecognizerRef recognizer, void *context)
+void button_up_handler(ClickRecognizerRef recognizer, void *context)
 {
 	if (g_in_fight)
 	{
@@ -198,7 +192,7 @@ static void button_up_handler(ClickRecognizerRef recognizer, void *context)
 	}
 }
 
-static void button_down_handler(ClickRecognizerRef recognizer, void *context)
+void button_down_handler(ClickRecognizerRef recognizer, void *context)
 {
 	if (g_in_fight)
 	{
@@ -217,13 +211,13 @@ static void button_down_handler(ClickRecognizerRef recognizer, void *context)
 	}
 }
 
-static void click_config_provider(Window *window)
+void click_config_provider(Window *window)
 {	
 	window_single_click_subscribe(BUTTON_ID_UP, button_up_handler);
 	window_single_click_subscribe(BUTTON_ID_DOWN, button_down_handler);
 }
 
-static void window_main_load(Window *window)
+void window_main_load(Window *window)
 {
 	g_image_layer_main = bitmap_layer_create(GRect(0, 0, 144, 168));
 	g_image_main_background = gbitmap_create_with_resource(RESOURCE_ID_CORRIDOR_CONTINUE); // Initially set the image so we have something to destroy in the step function
@@ -267,7 +261,7 @@ static void window_main_load(Window *window)
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(g_text_layer_exp));
 }
 
-static void window_main_unload(Window *window)
+void window_main_unload(Window *window)
 {	
 	bitmap_layer_destroy(g_image_layer_main);
 	gbitmap_destroy(g_image_main_background);
@@ -283,7 +277,7 @@ static void window_main_unload(Window *window)
 	gbitmap_destroy(g_image_help_run);
 }
 
-static void window_menu_load(Window *window)
+void window_menu_load(Window *window)
 {
 	// menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_MENU_ICON_1);
 
@@ -313,12 +307,12 @@ static void window_menu_load(Window *window)
 	};
 }
 
-static void window_menu_unload(Window *window)
+void window_menu_unload(Window *window)
 {	
 	simple_menu_layer_destroy(g_layer_menu);
 }
 
-static void tap_handler(AccelAxisType axis, int32_t direction)
+void tap_handler(AccelAxisType axis, int32_t direction)
 {
 	if (!window_stack_contains_window(g_window_clock)) // Don't make duplicates of the clock window
 	{
@@ -326,21 +320,21 @@ static void tap_handler(AccelAxisType axis, int32_t direction)
 	}
 }
 
-static void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially populate the clock so the face doesn't start blank
+void populate_clock(struct tm *tick_time, TimeUnits units_changed) // Initially populate the clock so the face doesn't start blank
 {
 	// We need space for at least "00:00xxx" and a trailing space
-	static char time_buffer[9];
+	char time_buffer[9];
 	strftime(time_buffer, sizeof(time_buffer), "%H:%M", tick_time);
 	clock_copy_time_string(time_buffer, sizeof(time_buffer)); // Reformat the time to the user's preference
 	text_layer_set_text(g_text_layer_time, time_buffer);
 
 	// We need space for at least "Wed, Dec 25" and a trailing space
-	static char date_buffer[12];
+	char date_buffer[12];
 	strftime(date_buffer, sizeof(date_buffer), "%a, %b %e", tick_time);
 	text_layer_set_text(g_text_layer_date, date_buffer);
 }
 
-static void hide_clock()
+void hide_clock()
 {
 	if (window_stack_contains_window(g_window_clock))
 	{
@@ -348,7 +342,7 @@ static void hide_clock()
 	}
 }
 
-static void window_clock_load(Window *window)
+void window_clock_load(Window *window)
 {
 	g_image_layer_clock = bitmap_layer_create(GRect(0, 0, 144, 168));
 	g_image_clock_background = gbitmap_create_with_resource(RESOURCE_ID_OTHER_PARCHMENT); // Initially set the image so we have something to destroy in the step function
@@ -422,7 +416,7 @@ static void window_clock_load(Window *window)
 	app_timer_register(g_clock_life, hide_clock, NULL); // Hide the clock after a certain amount of time
 }
 
-static void window_clock_unload(Window *window)
+void window_clock_unload(Window *window)
 {	
 	text_layer_destroy(g_text_layer_time);
 	text_layer_destroy(g_text_layer_date);
@@ -436,7 +430,7 @@ static void window_clock_unload(Window *window)
 	gbitmap_destroy(g_image_clock_battery);
 }
 
-static void init()
+void init()
 {
 	// Load persistent values before doing anything else
 	g_player_level = persist_exists(G_PLAYER_CURRENT_LEVEL_PKEY) ? persist_read_int(G_PLAYER_CURRENT_LEVEL_PKEY) : G_PLAYER_CURRENT_LEVEL_DEFAULT;
@@ -480,7 +474,7 @@ static void init()
 	window_set_fullscreen(g_window_clock, true); // Make the clock fullscreen
 }
 
-static void deinit()
+void deinit()
 {
 	// Save persistent values
 	persist_write_int(G_PLAYER_CURRENT_LEVEL_PKEY, g_player_level);

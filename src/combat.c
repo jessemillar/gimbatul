@@ -3,7 +3,7 @@
 #include "globals.h"
 #include "combat.h"
 
-static void heal_player(int amount)
+void heal_player(int amount)
 {
 	if (g_player_current_health < g_player_max_health)
 	{
@@ -18,7 +18,7 @@ static void heal_player(int amount)
 	}
 }
 
-static void hurt_player(int amount)
+void hurt_player(int amount)
 {
 	if (g_player_current_health > 0)
 	{
@@ -42,7 +42,7 @@ static void hurt_player(int amount)
 	}
 }
 
-static void hurt_enemy(int amount)
+void hurt_enemy(int amount)
 {
 	if (g_enemy_current_health > 0)
 	{
