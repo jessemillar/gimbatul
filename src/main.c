@@ -1,97 +1,36 @@
 #include <pebble.h>
 
-// These aren't values, they're "keys"
-#define G_PLAYER_CURRENT_LEVEL_PKEY 9999
-#define G_PLAYER_MAX_HEALTH_PKEY 9998
-#define G_PLAYER_CURRENT_HEALTH_PKEY 9997
-#define G_PLAYER_MAX_EXP_PKEY 9996
-#define G_PLAYER_CURRENT_EXP_PKEY 9995
-#define G_PLAYER_HEAL_RATE_PKEY 9994
-#define G_PLAYER_ATTACK_PKEY 9993
-
-// These are the default values
-#define G_PLAYER_CURRENT_LEVEL_DEFAULT 1
-#define G_PLAYER_MAX_HEALTH_DEFAULT 100
-#define G_PLAYER_CURRENT_HEALTH_DEFAULT 100
-#define G_PLAYER_MAX_EXP_DEFAULT 5
-#define G_PLAYER_CURRENT_EXP_DEFAULT 0
-#define G_PLAYER_HEAL_RATE_DEFAULT 1
-#define G_PLAYER_ATTACK_DEFAULT 3
-
-// We actually set these further down in init() (these are the ones we save to storage)
-static int g_player_level;
-static int g_player_max_health;
-static int g_player_current_health;
-static int g_player_max_exp;
-static int g_player_current_exp;
-static int g_player_heal_rate;
-static int g_player_attack;
+#include "globals.h"
+#include "combat.h"
+#include "main.h"
 
 // I need to do something better with generating these values (and they'll need to be saves on app exit in case you leave halfway through a fight)
-static int g_enemy_level = 2;
-static int g_enemy_max_health = 20;
-static int g_enemy_current_health = 20;
-static int g_enemy_attack = 2;
+int g_enemy_level = 2;
+int g_enemy_max_health = 20;
+int g_enemy_current_health = 20;
+int g_enemy_attack = 2;
 
-static int g_fight_probability_cap = 10;
-static int g_fight_probability = 1; // ...out of g_fight_probability_cap is a fight
-static bool g_in_fight = false;
+int g_fight_probability_cap = 10;
+int g_fight_probability = 1; // ...out of g_fight_probability_cap is a fight
+bool g_in_fight = false;
 
-static Window *g_window_main;
-static Window *g_window_menu;
-static Window *g_window_clock;
+int g_clock_life = 2500; // Lifetime in milliseconds
 
-static BitmapLayer *g_image_layer_main;
-static GBitmap *g_image_main_background;
-static Layer *g_layer_health_bars;
-static GFont *g_font_press_start;
-static TextLayer *g_text_layer_lvl;
-static TextLayer *g_text_layer_exp;
-static BitmapLayer *g_image_layer_help_attack;
-static GBitmap *g_image_help_attack;
-static BitmapLayer *g_image_layer_help_menu;
-static GBitmap *g_image_help_menu;
-static BitmapLayer *g_image_layer_help_run;
-static GBitmap *g_image_help_run;
-
-static SimpleMenuLayer *g_layer_menu;
-static SimpleMenuItem *g_layer_menu_items;
-
-static int g_clock_life = 2500; // Lifetime in milliseconds
-static BitmapLayer *g_image_layer_clock;
-static GBitmap *g_image_clock_background;
-static GFont *g_font_alagard_16;
-static GFont *g_font_alagard_32;
-static TextLayer *g_text_layer_time;
-static TextLayer *g_text_layer_date;
-static BitmapLayer *g_image_layer_clock_bluetooth;
-static GBitmap *g_image_clock_bluetooth;
-static BitmapLayer *g_image_layer_clock_battery;
-static GBitmap *g_image_clock_battery;
-
-static int g_image_count_corridor = 4; // I'm too lazy to figure out a better way to do this
-static uint32_t g_images_corridor[4] = {
+int g_image_count_corridor = 4; // I'm too lazy to figure out a better way to do this
+uint32_t g_images_corridor[4] = {
 	RESOURCE_ID_CORRIDOR_CONTINUE,
 	RESOURCE_ID_CORRIDOR_DEAD,
 	RESOURCE_ID_CORRIDOR_LEFT,
 	RESOURCE_ID_CORRIDOR_RIGHT
 };
 
-static int g_image_count_enemies = 4; // I'm too lazy to figure out a better way to do this
-static uint32_t g_images_enemies[4] = {
+int g_image_count_enemies = 4; // I'm too lazy to figure out a better way to do this
+uint32_t g_images_enemies[4] = {
 	RESOURCE_ID_ENEMY_SKELLY,
 	RESOURCE_ID_ENEMY_SLUG,
 	RESOURCE_ID_ENEMY_SPIDER,
 	RESOURCE_ID_ENEMY_TROLL
 };
-
-static void log_int(int num)
-{
-	static char log_buffer[100]; // We need "static" so the buffer persists...?
-	snprintf(log_buffer, sizeof(log_buffer), "%d", num);
-
-	APP_LOG(APP_LOG_LEVEL_INFO, log_buffer);
-}
 
 static int random(int cap)
 {

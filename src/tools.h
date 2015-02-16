@@ -1,0 +1,1 @@
+static void log_int(int num);
